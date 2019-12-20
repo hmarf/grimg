@@ -104,8 +104,8 @@ func main() {
 			return
 		}
 		fmt.Println("gif")
-		g := rimg.GifService{Img: &gifimg}
-		g.Resize(file, uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+		g := rimg.GifService{Img: gifimg}
+		g.Resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp), comp)
 	default:
 		log.Printf("%v", "対応していないフォーマットです")
 	}
