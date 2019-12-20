@@ -72,7 +72,7 @@ func main() {
 	// compression rate
 	comp := 0.1
 
-	filepath := "./img/test.jpg"
+	filepath := "./img/test.gif"
 	file, err := os.Open(filepath)
 	defer file.Close()
 	if err != nil {
@@ -81,16 +81,27 @@ func main() {
 	}
 
 	img, format, err := image.Decode(file)
+	if err != nil {
+		log.Printf("%v", "画像形式ではありません")
+		return
+	}
+
 	r := img.Bounds()
 	switch format {
 	case "png":
+		fmt.Println("png")
 		p := rimg.PngService{Img: &img}
 		p.Resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
 	case "jpeg":
+		fmt.Println("jpeg")
 		j := rimg.JpegService{Img: &img}
 		j.Resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
 	case "gif":
 		fmt.Println("gif")
+		g := rimg.GifService{Img: &img}
+		g.Resize(file, uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+	default:
+		log.Printf("%v", "対応していないフォーマットです")
 	}
 
 	// if err != nil {
