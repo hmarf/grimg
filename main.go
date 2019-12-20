@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/hmarf/gregif/rimg"
 	"github.com/nfnt/resize"
 )
 
@@ -63,11 +64,15 @@ func judgeImage(img image.Image, file *os.File, comp float64) *image.RGBA {
 	return nil
 }
 
+func grimg() {
+
+}
+
 func main() {
 	// compression rate
 	comp := 0.1
 
-	filepath := "./image/pokemon.png"
+	filepath := "./img/test.jpg"
 	file, err := os.Open(filepath)
 	defer file.Close()
 	if err != nil {
@@ -75,12 +80,24 @@ func main() {
 		return
 	}
 
-	img, _, err := image.Decode(file)
-	if err != nil {
-		log.Printf("%v", "画像形式ではありません")
-		return
+	img, format, err := image.Decode(file)
+	r := img.Bounds()
+	switch format {
+	case "png":
+		p := rimg.PngService{Img: &img}
+		p.Resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+	case "jpeg":
+		j := rimg.JpegService{Img: &img}
+		j.Resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+	case "gif":
+		fmt.Println("gif")
 	}
-	judgeImage(img, file, comp)
+
+	// if err != nil {
+	// 	log.Printf("%v", "画像形式ではありません")
+	// 	return
+	// }
+	// judgeImage(img, file, comp)
 	// sImage := judgeImage(img, buf, comp)
 	// if sImage == nil {
 	// 	log.Printf("%v", "対応していないファイル形式です")
