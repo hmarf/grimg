@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"image/gif"
 	_ "image/gif"
 	"image/jpeg"
 	_ "image/jpeg"
@@ -39,21 +40,25 @@ func createRGBAImage(img image.Image) image.Image {
 	return nImage
 }
 
-func judgeImage(img image.Image, comp float64) *image.RGBA {
-	if _, ok := img.(*image.NRGBA); ok {
-		fmt.Println("NRGBA")
-		ibounds := img.Bounds()
-		return createRGBAImage(resizeImage(img, int(float64(ibounds.Dx())*comp), int(float64(ibounds.Dy())*comp))).(*image.RGBA)
-	} else if _, ok := img.(*image.RGBA); ok {
+func judgeImage(img image.Image, file *os.File, comp float64) *image.RGBA {
+	if _, ok := img.(*image.RGBA); ok {
 		fmt.Println("RGBA")
 		ibounds := img.Bounds()
 		return resizeImage(img, int(float64(ibounds.Dx())*comp), int(float64(ibounds.Dy())*comp)).(*image.RGBA)
-	} else if _, ok := img.(*image.YCbCr); ok {
-		fmt.Println("YCbCr")
-		ibounds := img.Bounds()
-		return createRGBAImage(resizeImage(img, int(float64(ibounds.Dx())*comp), int(float64(ibounds.Dy())*comp))).(*image.RGBA)
 	} else if _, ok := img.(*image.Paletted); ok {
 		fmt.Println("paletted")
+		file.Seek(0, 0)
+		_, err := gif.DecodeAll(file)
+		if err != nil {
+			log.Printf("%v", err)
+			return nil
+		}
+		fmt.Println("ok")
+		return nil
+	} else {
+		ibounds := img.Bounds()
+		return createRGBAImage(
+			resizeImage(img, int(float64(ibounds.Dx())*comp), int(float64(ibounds.Dy())*comp))).(*image.RGBA)
 	}
 	return nil
 }
@@ -63,36 +68,22 @@ func main() {
 	comp := 0.1
 
 	filepath := "./image/pokemon.png"
-	stash, err := os.Open(filepath)
-	defer stash.Close()
+	file, err := os.Open(filepath)
+	defer file.Close()
 	if err != nil {
 		log.Printf("%v", "ファイルを開くことができません")
 		return
 	}
-	img, _, err := image.Decode(stash)
+
+	img, _, err := image.Decode(file)
 	if err != nil {
 		log.Printf("%v", "画像形式ではありません")
+		return
 	}
-
-	sImage := judgeImage(img, comp)
-	saveImage("tes.jpg", sImage)
-
-	// gifImage, err := gif.DecodeAll(stash)
-	// if err != nil {
-	// 	log.Printf("%v", "ファイルは.gif形式ではありません")
-	// 	return
+	judgeImage(img, file, comp)
+	// sImage := judgeImage(img, buf, comp)
+	// if sImage == nil {
+	// 	log.Printf("%v", "対応していないファイル形式です")
 	// }
-	// imageConf := gifImage.Config
-	// width := float64(imageConf.Width)
-	// height := float64(imageConf.Height)
-	// fmt.Println(width, height)
-	// fmt.Println(imageConf)
-	// for _, frame := range gifImage.Image {
-	// 	rec := frame.Bounds()
-	// 	_image := frame.SubImage(rec)
-	// 	resizedImage := resize.Resize(uint(math.Floor(float64(rec.Dx())*comp)),
-	// 		uint(math.Floor(float64(rec.Dy())*comp)),
-	// 		_image, resize.Lanczos3)
-
-	// }
+	// saveImage("tes.jpg", sImage)
 }
