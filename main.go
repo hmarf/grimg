@@ -97,21 +97,16 @@ func main() {
 		j := rimg.JpegService{Img: &img}
 		j.Resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
 	case "gif":
+		file.Seek(0, 0)
+		gifimg, err := gif.DecodeAll(file)
+		if err != nil {
+			log.Printf("%v", err)
+			return
+		}
 		fmt.Println("gif")
-		g := rimg.GifService{Img: &img}
+		g := rimg.GifService{Img: &gifimg}
 		g.Resize(file, uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
 	default:
 		log.Printf("%v", "対応していないフォーマットです")
 	}
-
-	// if err != nil {
-	// 	log.Printf("%v", "画像形式ではありません")
-	// 	return
-	// }
-	// judgeImage(img, file, comp)
-	// sImage := judgeImage(img, buf, comp)
-	// if sImage == nil {
-	// 	log.Printf("%v", "対応していないファイル形式です")
-	// }
-	// saveImage("tes.jpg", sImage)
 }
