@@ -70,7 +70,7 @@ func grimg() {
 
 func main() {
 	// compression rate
-	comp := 0.1
+	comp := 0.5
 
 	filepath := "./img/test.gif"
 	file, err := os.Open(filepath)
