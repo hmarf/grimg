@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/gif"
-	"log"
 	"os"
 )
 
@@ -16,13 +15,13 @@ func Grimg() {
 	file, err := os.Open(filepath)
 	defer file.Close()
 	if err != nil {
-		log.Printf("%v", "ファイルを開くことができません")
+		fmt.Printf("\x1b[31m%s\x1b[0m", "can not open file")
 		return
 	}
 
 	img, format, err := image.Decode(file)
 	if err != nil {
-		log.Printf("%v", "画像形式ではありません")
+		fmt.Printf("\x1b[31m%s\x1b[0m", "File not in image format")
 		return
 	}
 
@@ -31,22 +30,35 @@ func Grimg() {
 	case "png":
 		fmt.Println("png")
 		p := pngService{Img: &img}
-		p.resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+		err = p.resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+		if err != nil {
+			fmt.Printf("\x1b[31m%s\x1b[0m", err)
+			return
+		}
 	case "jpeg":
 		fmt.Println("jpeg")
 		j := jpegService{Img: &img}
-		j.resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+		err = j.resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp))
+		if err != nil {
+			fmt.Printf("\x1b[31m%s\x1b[0m", err)
+			return
+		}
 	case "gif":
 		file.Seek(0, 0)
 		gifimg, err := gif.DecodeAll(file)
 		if err != nil {
-			log.Printf("%v", err)
+			fmt.Printf("\x1b[31m%s\x1b[0m", err)
 			return
 		}
 		fmt.Println("gif")
 		g := gifService{Img: gifimg}
-		g.resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp), comp)
+		err = g.resize(uint(float64(r.Dx())*comp), uint(float64(r.Dy())*comp), comp)
+		if err != nil {
+			fmt.Printf("\x1b[31m%s\x1b[0m", err)
+			return
+		}
 	default:
-		log.Printf("%v", "対応していないフォーマットです")
+		fmt.Printf("\x1b[31m%s\x1b[0m", "The format is not supported")
+		return
 	}
 }

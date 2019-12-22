@@ -29,13 +29,16 @@ func (g *gifService) resize(width uint, height uint, rate float64) error {
 	cUsedM := make(map[color.Color]bool)
 	fmt.Println(width, height)
 	var u int
+	var e int
 	for _, frame := range g.Img.Image {
+
 		rec := frame.Bounds()
 
 		rImage := resize.Resize(width, height, frame.SubImage(rec), resize.Lanczos3)
 		rrec := rImage.Bounds()
 
 		if rrec.Dx() > int(width) || rrec.Dy() > int(height) {
+			e++
 			continue
 		}
 
@@ -68,7 +71,5 @@ func (g *gifService) resize(width uint, height uint, rate float64) error {
 	}
 	defer out.Close()
 
-	err = gif.EncodeAll(out, &outGif)
-
-	return nil
+	return gif.EncodeAll(out, &outGif)
 }
