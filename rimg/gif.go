@@ -11,7 +11,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-type GifService struct {
+type gifService struct {
 	Img *gif.GIF
 }
 
@@ -23,7 +23,7 @@ func keys(m map[color.Color]bool) color.Palette {
 	return p
 }
 
-func (g *GifService) Resize(width uint, height uint, rate float64) error {
+func (g *gifService) resize(width uint, height uint, rate float64) error {
 
 	outGif := gif.GIF{}
 	cUsedM := make(map[color.Color]bool)

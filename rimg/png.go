@@ -8,11 +8,11 @@ import (
 	"github.com/nfnt/resize"
 )
 
-type PngService struct {
+type pngService struct {
 	Img *image.Image
 }
 
-func (p *PngService) Resize(width uint, height uint) error {
+func (p *pngService) resize(width uint, height uint) error {
 	m := resize.Resize(width, height, *p.Img, resize.Lanczos3)
 
 	outfile, err := os.Create("resize.png")
