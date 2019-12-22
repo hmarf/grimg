@@ -59,6 +59,7 @@ func Grimg(o Option) {
 		}
 		fmt.Println("gif")
 		g := gifService{Img: gifimg}
+		fmt.Println(r)
 		err = g.resize(uint(float64(r.Dx())*o.Compression), uint(float64(r.Dy())*o.Compression), o)
 		if err != nil {
 			log.Fatalf("\x1b[31m%s\x1b[0m", err)
