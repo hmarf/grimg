@@ -25,16 +25,19 @@ func keys(m map[color.Color]bool) color.Palette {
 
 func (g *GifService) Resize(width uint, height uint, rate float64) error {
 
-	// var out image.Image
-
 	outGif := gif.GIF{}
-	// var preG image.Image
-	// var preB image.Rectangle
 	cUsedM := make(map[color.Color]bool)
-	for i, frame := range g.Img.Image {
+	fmt.Println(width, height)
+	var u int
+	for _, frame := range g.Img.Image {
 		rec := frame.Bounds()
 
 		rImage := resize.Resize(width, height, frame.SubImage(rec), resize.Lanczos3)
+		rrec := rImage.Bounds()
+
+		if rrec.Dx() > int(width) || rrec.Dy() > int(height) {
+			continue
+		}
 
 		// The color used in the original image
 		for x := 1; x <= rec.Dx(); x++ {
@@ -45,23 +48,19 @@ func (g *GifService) Resize(width uint, height uint, rate float64) error {
 			}
 		}
 		scUsedP := keys(cUsedM)
-		rrec := rImage.Bounds()
-		if i > 0 {
-			// x := int(width)
-			// y := int(height)
-			rrec = image.Rect(int(float64(rec.Min.X)*rate), int(float64(rec.Min.Y)*rate), rrec.Dx(), rrec.Dy())
-			fmt.Println(rrec)
+		if u > 0 {
+			rrec = image.Rect(int(float64(rec.Min.X)*rate), int(float64(rec.Min.Y)*rate), rrec.Dx()+int(float64(rec.Min.X)*rate), rrec.Dy()+int(float64(rec.Min.Y)*rate))
 		}
 
 		rp := image.NewPaletted(rrec, scUsedP)
 		draw.Draw(rp, rrec, rImage, image.ZP, draw.Src)
 		outGif.Image = append(outGif.Image, rp)
-		outGif.Delay = append(outGif.Delay, g.Img.Delay[i])
+		outGif.Delay = append(outGif.Delay, g.Img.Delay[u])
+		u++
 	}
 
 	outGif.Config.Width = int(width)
 	outGif.Config.Height = int(height)
-	fmt.Print(outGif.Config)
 
 	out, err := os.Create("resized.gif")
 	if err != nil {
@@ -70,7 +69,6 @@ func (g *GifService) Resize(width uint, height uint, rate float64) error {
 	defer out.Close()
 
 	err = gif.EncodeAll(out, &outGif)
-	fmt.Println(err)
-	fmt.Println("ok")
+
 	return nil
 }
