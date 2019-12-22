@@ -23,7 +23,7 @@ func keys(m map[color.Color]bool) color.Palette {
 	return p
 }
 
-func (g *gifService) resize(width uint, height uint, rate float64) error {
+func (g *gifService) resize(width uint, height uint, o Option) error {
 
 	outGif := gif.GIF{}
 	cUsedM := make(map[color.Color]bool)
@@ -52,7 +52,11 @@ func (g *gifService) resize(width uint, height uint, rate float64) error {
 		}
 		scUsedP := keys(cUsedM)
 		if u > 0 {
-			rrec = image.Rect(int(float64(rec.Min.X)*rate), int(float64(rec.Min.Y)*rate), rrec.Dx()+int(float64(rec.Min.X)*rate), rrec.Dy()+int(float64(rec.Min.Y)*rate))
+			rrec = image.Rect(
+				int(float64(rec.Min.X)*o.Compression),
+				int(float64(rec.Min.Y)*o.Compression),
+				rrec.Dx()+int(float64(rec.Min.X)*o.Compression),
+				rrec.Dy()+int(float64(rec.Min.Y)*o.Compression))
 		}
 
 		rp := image.NewPaletted(rrec, scUsedP)
@@ -65,11 +69,18 @@ func (g *gifService) resize(width uint, height uint, rate float64) error {
 	outGif.Config.Width = int(width)
 	outGif.Config.Height = int(height)
 
-	out, err := os.Create("resized.gif")
+	out, err := os.Create(o.OutputFile)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
 
-	return gif.EncodeAll(out, &outGif)
+	err = gif.EncodeAll(out, &outGif)
+	if err != nil {
+		return err
+	}
+	if e != 0 {
+		return fmt.Errorf("Failed to save %d frames", e)
+	}
+	return nil
 }

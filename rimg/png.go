@@ -12,10 +12,10 @@ type pngService struct {
 	Img *image.Image
 }
 
-func (p *pngService) resize(width uint, height uint) error {
+func (p *pngService) resize(width uint, height uint, o Option) error {
 	m := resize.Resize(width, height, *p.Img, resize.Lanczos3)
 
-	outfile, err := os.Create("resize.png")
+	outfile, err := os.Create(o.OutputFile)
 	if err != nil {
 		return err
 	}
