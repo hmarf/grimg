@@ -30,6 +30,7 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 	fmt.Println(width, height)
 	var e int
 	//cUsedM := make(map[color.Color]bool)
+	fmt.Println(g.Img.Disposal[0])
 	fmt.Println()
 	for i, frame := range g.Img.Image {
 
@@ -64,6 +65,7 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 		draw.Draw(rp, rrec, rImage, image.ZP, draw.Src)
 		outGif.Image = append(outGif.Image, rp)
 		outGif.Delay = append(outGif.Delay, g.Img.Delay[i])
+		fmt.Println(g.Img.Disposal[i])
 		outGif.Disposal = append(outGif.Disposal, g.Img.Disposal[i])
 	}
 
