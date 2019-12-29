@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
+	"image/jpeg"
 	"math"
 	"os"
 
@@ -36,6 +37,7 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 	for i, frame := range g.Img.Image {
 
 		rec := frame.Bounds()
+		fmt.Println(rec)
 
 		// rImage := resize.Resize(width, height, frame.SubImage(rec), resize.Lanczos3)
 		var rImage image.Image
@@ -46,12 +48,20 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 
 			// 描画する
 			// 元画像をまず描く
-			dstRect := image.Rectangle{image.Pt(0, 0), rec.Size()}
+			dstRect := image.Rectangle{image.Pt(0, 0), pImage.Bounds().Size()}
 			draw.Draw(out, dstRect, pImage, image.Pt(0, 0), draw.Src)
 
 			// 上書きする
-			srcRect := image.Rectangle{image.Pt(0, 0), rec.Size()}
-			draw.Draw(out, srcRect, frame, image.Pt(0, 0), draw.Over)
+			srcRect := image.Rectangle{image.Pt(rec.Min.X, rec.Min.Y), rec.Size()}
+			draw.Draw(out, srcRect, frame.SubImage(rec), image.Pt(rec.Min.X, rec.Min.Y), draw.Over)
+
+			outfile, err := os.Create("./test.jpg")
+			if err != nil {
+				return err
+			}
+			defer outfile.Close()
+
+			jpeg.Encode(outfile, out, &jpeg.Options{Quality: 100})
 
 			pImage = out
 			rImage = resize.Resize(
@@ -63,11 +73,10 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 				uint(math.Floor(float64(rec.Dx())*o.Compression)),
 				uint(math.Floor(float64(rec.Dy())*o.Compression)),
 				frame.SubImage(rec), resize.Lanczos3)
-			pImage = frame
+			pImage = frame.SubImage(rec)
 		}
 
 		rrec := rImage.Bounds()
-		fmt.Println(rrec)
 
 		cUsedM := make(map[color.Color]bool)
 		// The color used in the original image
@@ -92,14 +101,12 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 
 		outGif.Image = append(outGif.Image, rp)
 		outGif.Delay = append(outGif.Delay, g.Img.Delay[i])
-		fmt.Println(g.Img.Disposal[i])
-		outGif.Disposal = append(outGif.Disposal, g.Img.Disposal[i])
+		outGif.Disposal = append(outGif.Disposal, 2) //g.Img.Disposal[i])
 	}
 
 	outGif.Config.Width = int(width)
 	outGif.Config.Height = int(height)
 
-	fmt.Println(e)
 	out, err := os.Create(o.OutputFile)
 	if err != nil {
 		return err
