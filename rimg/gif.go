@@ -9,6 +9,7 @@ import (
 	"image/jpeg"
 	"math"
 	"os"
+	"strconv"
 
 	"github.com/nfnt/resize"
 )
@@ -55,13 +56,14 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 			srcRect := image.Rectangle{image.Pt(rec.Min.X, rec.Min.Y), rec.Size()}
 			draw.Draw(out, srcRect, frame.SubImage(rec), image.Pt(rec.Min.X, rec.Min.Y), draw.Over)
 
-			outfile, err := os.Create("./test.jpg")
+			st := "./testImage/" + strconv.Itoa(i) + ".jpg"
+			outfile, err := os.Create(st)
 			if err != nil {
 				return err
 			}
 			defer outfile.Close()
 
-			jpeg.Encode(outfile, out, &jpeg.Options{Quality: 100})
+			jpeg.Encode(outfile, frame.SubImage(rec), &jpeg.Options{Quality: 100})
 
 			pImage = out
 			rImage = resize.Resize(
