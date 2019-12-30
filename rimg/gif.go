@@ -35,16 +35,17 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 	fmt.Println(g.Img.Disposal[0])
 	fmt.Println()
 	var pImage image.Image
+	g.Img.Image[0].Bounds().Size()
+	a := 0
 	for i, frame := range g.Img.Image {
 
 		rec := frame.Bounds()
-		fmt.Println(rec)
 
 		// rImage := resize.Resize(width, height, frame.SubImage(rec), resize.Lanczos3)
 		var rImage image.Image
 		if i > 0 {
 			// 書き出し用のイメージを準備
-			outRect := image.Rectangle{image.Pt(0, 0), rec.Size()}
+			outRect := image.Rectangle{image.Pt(0, 0), g.Img.Image[0].Bounds().Size()}
 			out := image.NewRGBA(outRect)
 
 			// 描画する
@@ -63,22 +64,24 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 			}
 			defer outfile.Close()
 
-			jpeg.Encode(outfile, frame.SubImage(rec), &jpeg.Options{Quality: 100})
+			jpeg.Encode(outfile, out, &jpeg.Options{Quality: 100})
 
+			fmt.Println("out", out.Bounds())
 			pImage = out
 			rImage = resize.Resize(
-				uint(math.Floor(float64(rec.Dx())*o.Compression)),
-				uint(math.Floor(float64(rec.Dy())*o.Compression)),
+				uint(width),
+				uint(height),
 				out, resize.Lanczos3)
 		} else {
 			rImage = resize.Resize(
 				uint(math.Floor(float64(rec.Dx())*o.Compression)),
 				uint(math.Floor(float64(rec.Dy())*o.Compression)),
 				frame.SubImage(rec), resize.Lanczos3)
-			pImage = frame.SubImage(rec)
+			pImage = frame
 		}
 
 		rrec := rImage.Bounds()
+		//fmt.Println(rrec)
 
 		cUsedM := make(map[color.Color]bool)
 		// The color used in the original image
@@ -90,22 +93,27 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 			}
 		}
 		scUsedP := keys(cUsedM)
-		if i > 0 {
-			rrec = image.Rect(
-				int(math.Floor(float64(rec.Min.X)*o.Compression)),
-				int(math.Floor(float64(rec.Min.Y)*o.Compression)),
-				rrec.Dx()+int(math.Floor(float64(rec.Min.X)*o.Compression)),
-				rrec.Dy()+int(math.Floor(float64(rec.Min.Y)*o.Compression)))
-		}
+		// if i > 0 {
+		// 	rrec = image.Rect(
+		// 		int(math.Floor(float64(rec.Min.X)*o.Compression)),
+		// 		int(math.Floor(float64(rec.Min.Y)*o.Compression)),
+		// 		rrec.Dx()+int(math.Floor(float64(rec.Min.X)*o.Compression)),
+		// 		rrec.Dy()+int(math.Floor(float64(rec.Min.Y)*o.Compression)))
+		// }
 
+		if rrec.Max.X > int(width) || rrec.Max.Y > int(height) {
+			continue
+		}
 		rp := image.NewPaletted(rrec, scUsedP)
 		draw.Draw(rp, rrec, rImage, image.ZP, draw.Src)
 
 		outGif.Image = append(outGif.Image, rp)
 		outGif.Delay = append(outGif.Delay, g.Img.Delay[i])
 		outGif.Disposal = append(outGif.Disposal, 2) //g.Img.Disposal[i])
+		a++
 	}
 
+	fmt.Println(a)
 	outGif.Config.Width = int(width)
 	outGif.Config.Height = int(height)
 
