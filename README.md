@@ -33,13 +33,6 @@ GLOBAL OPTIONS:
    --version, -v                  print the version
 ```
 
-## important information
-**This program is not completed.**  
-Some gifs contain noise.The cause is being analyzed.  
-
-<img src="https://github.com/hmarf/gregif/blob/master/img/input_d.gif?raw=true" width="500px">  
-<img src="https://github.com/hmarf/gregif/blob/master/img/output_d.gif?raw=true" width="250px">
-
 ## Example
 png and jpeg
 - Resize './img/input.png' to './output.png'
