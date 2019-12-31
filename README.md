@@ -55,3 +55,7 @@ go run cmd/main.go -i ./img/input_d.gif -c 0.5
 ```
 <img src="https://github.com/hmarf/gregif/blob/master/img/input_d.gif?raw=true" width="500px">  
 <img src="https://github.com/hmarf/gregif/blob/master/img/output_d.gif?raw=true" width="250px">
+
+## Reference
+- https://cs.nyu.edu/courses/fall10/V22.0004-002/animatedGifs.pdf
+- https://golang.org/pkg/image/gif/
