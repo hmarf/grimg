@@ -54,11 +54,12 @@ func (g *gifService) resize(width uint, height uint, o Option) error {
 			draw.Draw(out, dstRect, pImage, image.Pt(0, 0), draw.Src)
 
 			// 上書きする
-			srcRect := image.Rectangle{image.Pt(rec.Min.X, rec.Min.Y), rec.Size()}
+			fmt.Println("rec", rec)
+			srcRect := image.Rectangle{image.Pt(rec.Min.X, rec.Min.Y), image.Pt(rec.Max.X, rec.Max.Y)} //rec.Size()
 			fmt.Println(srcRect)
 			draw.Draw(out, srcRect, frame, image.Pt(rec.Min.X, rec.Min.Y), draw.Over)
 
-			fmt.Println("out", out.Bounds())
+			// fmt.Println("out", out.Bounds())
 			// st := "./testImage/" + strconv.Itoa(i) + ".jpg"
 			// outfile, err := os.Create(st)
 			// if err != nil {
