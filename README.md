@@ -2,6 +2,7 @@
 
 ## Overview
 Compress images(jpg, png, gif).
+Set the reduction ratio and resize the image.
 
 ## Usage
 
@@ -54,3 +55,10 @@ go run cmd/main.go -i ./img/input.gif -c 0.5
 ```
 <img src="https://github.com/hmarf/gregif/blob/master/img/input.gif?raw=true" width="150px">
 <img src="https://github.com/hmarf/gregif/blob/master/img/output.gif?raw=true" width="75px">
+
+- Resize './img/input_d.gif' to './output_d.gif'
+```
+go run cmd/main.go -i ./img/input_d.gif -c 0.5
+```
+<img src="https://github.com/hmarf/gregif/blob/master/img/input_d.gif?raw=true" width="500px">  
+<img src="https://github.com/hmarf/gregif/blob/master/img/output_d.gif?raw=true" width="250px">
