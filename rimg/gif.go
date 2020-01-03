@@ -23,6 +23,21 @@ func keys(m map[color.Color]bool) color.Palette {
 	return p
 }
 
+func getGifColor(rec image.Rectangle, img image.Image, w int, h int) color.Palette {
+
+	cUsedM := make(map[color.Color]bool)
+	// The color used in the original image
+	for x := 1; x <= w; x++ {
+		for y := 1; y <= h; y++ {
+			if _, ok := cUsedM[img.At(x, y)]; !ok {
+				cUsedM[img.At(x, y)] = true
+			}
+		}
+	}
+	return keys(cUsedM)
+
+}
+
 func (g *gifService) resizeDisposalNone(width uint, height uint, o Option, outGif *gif.GIF) {
 
 	var pImage image.Image
@@ -62,18 +77,9 @@ func (g *gifService) resizeDisposalNone(width uint, height uint, o Option, outGi
 
 		rrec := rImage.Bounds()
 
-		cUsedM := make(map[color.Color]bool)
-		// The color used in the original image
-		for x := 1; x <= oWidth; x++ {
-			for y := 1; y <= oheight; y++ {
-				if _, ok := cUsedM[pImage.At(x, y)]; !ok {
-					cUsedM[pImage.At(x, y)] = true
-				}
-			}
-		}
-		scUsedP := keys(cUsedM)
+		c := getGifColor(rrec, pImage, oWidth, oheight)
 
-		rp := image.NewPaletted(rrec, scUsedP)
+		rp := image.NewPaletted(rrec, c)
 		draw.Draw(rp, rrec, rImage, image.ZP, draw.Src)
 
 		outGif.Image = append(outGif.Image, rp)
@@ -96,16 +102,8 @@ func (g *gifService) resizeDisposalPrevious(width uint, height uint, o Option, o
 			frame.SubImage(rec), resize.Lanczos3)
 		rrec := rImage.Bounds()
 
-		cUsedM := make(map[color.Color]bool)
-		// The color used in the original image
-		for x := 1; x <= rec.Dx(); x++ {
-			for y := 1; y <= rec.Dy(); y++ {
-				if _, ok := cUsedM[frame.At(x, y)]; !ok {
-					cUsedM[frame.At(x, y)] = true
-				}
-			}
-		}
-		scUsedP := keys(cUsedM)
+		c := getGifColor(rrec, frame, rec.Dx(), rec.Dy())
+
 		if i > 0 {
 			rrec = image.Rect(
 				int(math.Floor(float64(rec.Min.X)*o.Compression)),
@@ -114,7 +112,7 @@ func (g *gifService) resizeDisposalPrevious(width uint, height uint, o Option, o
 				rrec.Dy()+int(math.Floor(float64(rec.Min.Y)*o.Compression)))
 		}
 
-		rp := image.NewPaletted(rrec, scUsedP)
+		rp := image.NewPaletted(rrec, c)
 		draw.Draw(rp, rrec, rImage, image.ZP, draw.Src)
 		outGif.Image = append(outGif.Image, rp)
 		outGif.Delay = append(outGif.Delay, g.Img.Delay[i])
